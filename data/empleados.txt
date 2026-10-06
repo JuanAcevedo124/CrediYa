@@ -1,0 +1,2 @@
+1;Ana Garcia;1001;ana@crediya.com;asesor;2500000.0
+2;Carlos Ruiz;1002;carlos@crediya.com;cajero;2200000.0
