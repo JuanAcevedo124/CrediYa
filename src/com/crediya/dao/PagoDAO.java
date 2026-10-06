@@ -12,23 +12,34 @@ public class PagoDAO implements IGenericDAO<Pago> {
     @Override
 
     public void guardar(Pago p) {
-        List<Pago> todos = listarDeArchivo();
-        int nuevoId = todos.stream().mapToInt(Pago::getId).max().orElse(0) + 1;
-        if (p.getId() == 0) p.setId(nuevoId);
+        if (p.getId() == 0) p.setId(siguienteId());
         FileManager.agregarLinea(FILE, p.toFileString());
 
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
             if (c == null) return;
-            String sql = "INSERT INTO pagos(prestamo_id, fecha_pago, monto) VALUES(?,?,?)";
+            String sql = "INSERT INTO pagos(id, prestamo_id, fecha_pago, monto) VALUES(?,?,?,?)";
             try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setInt(1, p.getPrestamoId());
-                ps.setDate(2, java.sql.Date.valueOf(p.getFechaPago()));
-                ps.setDouble(3, p.getMonto());
+                ps.setInt(1, p.getId());
+                ps.setInt(2, p.getPrestamoId());
+                ps.setDate(3, java.sql.Date.valueOf(p.getFechaPago()));
+                ps.setDouble(4, p.getMonto());
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
             System.out.println("[MySQL] No se pudo guardar pago: " + ex.getMessage());
         }
+    }
+
+    private int siguienteId() {
+        int maxFile = listarDeArchivo().stream().mapToInt(Pago::getId).max().orElse(0);
+        int maxDb = 0;
+        try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
+            if (c != null) try (Statement st = c.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT MAX(id) FROM pagos")) {
+                if (rs.next()) maxDb = rs.getInt(1);
+            }
+        } catch (Exception ignored) {}
+        return Math.max(maxFile, maxDb) + 1;
     }
 
     public List<Pago> listarDeArchivo() {

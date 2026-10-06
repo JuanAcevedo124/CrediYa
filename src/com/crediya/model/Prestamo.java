@@ -79,10 +79,16 @@ public class Prestamo {
 
     @Override
     public String toString() {
-        return "Prestamo{id=" + id + ", clienteId=" + clienteId + ", empleadoId=" + empleadoId
-                + ", monto=" + monto + ", interes=" + interes + "%, cuotas=" + cuotas
-                + ", total=" + String.format("%.2f", getMontoTotal())
-                + ", cuota=" + String.format("%.2f", getValorCuota())
-                + ", inicio=" + fechaInicio + ", estado='" + estado + "'}";
+        return "  Prestamo ID: " + id + "\n"
+             + "  Cliente ID: " + clienteId + "\n"
+             + "  Empleado ID: " + empleadoId + "\n"
+             + "  Monto: " + String.format("%.2f", monto) + "\n"
+             + "  Interes: " + interes + "%\n"
+             + "  Cuotas: " + cuotas + "\n"
+             + "  Total con interes: " + String.format("%.2f", getMontoTotal()) + "\n"
+             + "  Valor cuota: " + String.format("%.2f", getValorCuota()) + "\n"
+             + "  Fecha inicio: " + fechaInicio + "\n"
+             + "  Estado: " + estado + "\n"
+             + "  ------------------------------";
     }
 }
