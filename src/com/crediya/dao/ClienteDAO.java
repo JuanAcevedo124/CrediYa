@@ -6,8 +6,10 @@ import com.crediya.util.FileManager;
 import java.sql.*;
 import java.util.*;
 
-public class ClienteDAO {
+public class ClienteDAO implements IGenericDAO<Cliente> {
     private static final String FILE = "data/clientes.txt";
+
+    @Override
 
     public void guardar(Cliente c) {
         List<Cliente> todos = listarDeArchivo();
@@ -38,6 +40,7 @@ public class ClienteDAO {
         return lista;
     }
 
+    @Override
     public List<Cliente> listar() {
         try (Connection con = DatabaseConnection.getInstancia().getConnection()) {
             if (con != null) {
@@ -58,3 +61,4 @@ public class ClienteDAO {
         return listarDeArchivo();
     }
 }
+
