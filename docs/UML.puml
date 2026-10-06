@@ -1,0 +1,64 @@
+@startuml CrediYa
+abstract class Persona {
+  #id : int
+  #nombre : String
+  #documento : String
+  #correo : String
+  +toFileString() : String
+}
+class Empleado {
+  -rol : String
+  -salario : double
+}
+class Cliente {
+  -telefono : String
+}
+class Prestamo {
+  -id : int
+  -clienteId : int
+  -empleadoId : int
+  -monto : double
+  -interes : double
+  -cuotas : int
+  -fechaInicio : LocalDate
+  -estado : String
+  +getMontoTotal() : double
+  +getValorCuota() : double
+  +isVencido() : boolean
+}
+class Pago {
+  -id : int
+  -prestamoId : int
+  -fechaPago : LocalDate
+  -monto : double
+}
+class CrediYaService {
+  +crearPrestamo() : Prestamo
+  +registrarPago() : void
+  +saldoPendiente() : double
+  +prestamosActivos() : List
+  +prestamosVencidos() : List
+  +clientesMorosos() : List
+}
+class EmpleadoDAO
+class ClienteDAO
+class PrestamoDAO
+class PagoDAO
+class DatabaseConnection {
+  -instancia : DatabaseConnection
+  +getInstancia() : DatabaseConnection
+  +getConnection() : Connection
+}
+class FileManager {
+  +leerLineas() : List
+  +escribirLineas() : void
+}
+Persona <|-- Empleado
+Persona <|-- Cliente
+CrediYaService --> EmpleadoDAO
+CrediYaService --> ClienteDAO
+CrediYaService --> PrestamoDAO
+CrediYaService --> PagoDAO
+PrestamoDAO --> Prestamo
+PagoDAO --> Pago
+@enduml
