@@ -12,27 +12,39 @@ public class PrestamoDAO implements IGenericDAO<Prestamo> {
     @Override
 
     public void guardar(Prestamo p) {
-        List<Prestamo> todos = listarDeArchivo();
-        int nuevoId = todos.stream().mapToInt(Prestamo::getId).max().orElse(0) + 1;
-        if (p.getId() == 0) p.setId(nuevoId);
+        if (p.getId() == 0) p.setId(siguienteId());
         FileManager.agregarLinea(FILE, p.toFileString());
 
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
             if (c == null) return;
-            String sql = "INSERT INTO prestamos(cliente_id, empleado_id, monto, interes, cuotas, fecha_inicio, estado) VALUES(?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO prestamos(id, cliente_id, empleado_id, monto, interes, cuotas, fecha_inicio, estado) VALUES(?,?,?,?,?,?,?,?)";
             try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setInt(1, p.getClienteId());
-                ps.setInt(2, p.getEmpleadoId());
-                ps.setDouble(3, p.getMonto());
-                ps.setDouble(4, p.getInteres());
-                ps.setInt(5, p.getCuotas());
-                ps.setDate(6, java.sql.Date.valueOf(p.getFechaInicio()));
-                ps.setString(7, p.getEstado());
+                ps.setInt(1, p.getId());
+                ps.setInt(2, p.getClienteId());
+                ps.setInt(3, p.getEmpleadoId());
+                ps.setDouble(4, p.getMonto());
+                ps.setDouble(5, p.getInteres());
+                ps.setInt(6, p.getCuotas());
+                ps.setDate(7, java.sql.Date.valueOf(p.getFechaInicio()));
+                ps.setString(8, p.getEstado());
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
             System.out.println("[MySQL] No se pudo guardar préstamo: " + ex.getMessage());
         }
+    }
+
+    /** ID sincronizado: max(archivo, BD)+1 para que no diverjan. */
+    private int siguienteId() {
+        int maxFile = listarDeArchivo().stream().mapToInt(Prestamo::getId).max().orElse(0);
+        int maxDb = 0;
+        try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
+            if (c != null) try (Statement st = c.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT MAX(id) FROM prestamos")) {
+                if (rs.next()) maxDb = rs.getInt(1);
+            }
+        } catch (Exception ignored) {}
+        return Math.max(maxFile, maxDb) + 1;
     }
 
     public List<Prestamo> listarDeArchivo() {

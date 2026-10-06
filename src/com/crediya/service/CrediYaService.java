@@ -1,7 +1,9 @@
 package com.crediya.service;
 
 import com.crediya.dao.*;
+import com.crediya.exception.ValidacionException;
 import com.crediya.model.*;
+import com.crediya.util.Validador;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.*;
@@ -27,7 +29,14 @@ public class CrediYaService {
     public List<Cliente> listarClientes() { return clienteDAO.listar(); }
 
     // --- Préstamos ---
-    public Prestamo crearPrestamo(int clienteId, int empleadoId, double monto, double interes, int cuotas) {
+    public Prestamo crearPrestamo(int clienteId, int empleadoId, double monto, double interes, int cuotas) throws ValidacionException {
+        Validador.positivo(monto, "Monto");
+        Validador.noNegativo(interes, "Interes");
+        Validador.positivo(cuotas, "Cuotas");
+        boolean existeCli = listarClientes().stream().anyMatch(c -> c.getId() == clienteId);
+        if (!existeCli) throw new ValidacionException("No existe cliente con id " + clienteId + ". Use 2.Listar empleados / 4.Listar clientes para ver IDs.");
+        boolean existeEmp = listarEmpleados().stream().anyMatch(e -> e.getId() == empleadoId);
+        if (!existeEmp) throw new ValidacionException("No existe empleado con id " + empleadoId + ".");
         Prestamo p = new Prestamo(0, clienteId, empleadoId, monto, interes, cuotas, LocalDate.now(), "pendiente");
         prestamoDAO.guardar(p);
         return p;
@@ -41,7 +50,10 @@ public class CrediYaService {
     }
 
     // --- Pagos ---
-    public void registrarPago(int prestamoId, double monto) {
+    public void registrarPago(int prestamoId, double monto) throws ValidacionException {
+        Validador.positivo(monto, "Monto del pago");
+        boolean existe = listarPrestamos().stream().anyMatch(p -> p.getId() == prestamoId);
+        if (!existe) throw new ValidacionException("No existe prestamo con id " + prestamoId + ".");
         pagoDAO.guardar(new Pago(0, prestamoId, LocalDate.now(), monto));
         // Si ya cubrió el total -> marcar pagado automáticamente
         if (saldoPendiente(prestamoId) <= 0) {

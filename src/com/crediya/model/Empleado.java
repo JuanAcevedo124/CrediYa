@@ -31,7 +31,12 @@ public class Empleado extends Persona {
 
     @Override
     public String toString() {
-        return "Empleado{id=" + id + ", nombre='" + nombre + "', documento='" + documento
-                + "', rol='" + rol + "', correo='" + correo + "', salario=" + salario + "}";
+        return "  Empleado ID: " + id + "\n"
+             + "  Nombre: " + nombre + "\n"
+             + "  Documento: " + documento + "\n"
+             + "  Correo: " + correo + "\n"
+             + "  Rol: " + rol + "\n"
+             + "  Salario: " + String.format("%.2f", salario) + "\n"
+             + "  ------------------------------";
     }
 }

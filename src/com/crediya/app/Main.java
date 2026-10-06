@@ -28,7 +28,12 @@ public class Main {
                         svc.registrarEmpleado(n, d, c, r, s);
                         System.out.println("Empleado guardado (archivo + BD).");
                     }
-                    case 2 -> svc.listarEmpleados().forEach(System.out::println);
+                    case 2 -> {
+                        var lista = svc.listarEmpleados();
+                        System.out.println("----- LISTA DE EMPLEADOS (" + lista.size() + ") -----");
+                        if (lista.isEmpty()) System.out.println("(No hay empleados.)");
+                        else lista.forEach(System.out::println);
+                    }
                     case 3 -> {
                         System.out.print("Nombre: "); String n = sc.nextLine();
                         System.out.print("Documento: "); String d = sc.nextLine();
@@ -37,7 +42,12 @@ public class Main {
                         svc.registrarCliente(n, d, co, t);
                         System.out.println("Cliente guardado.");
                     }
-                    case 4 -> svc.listarClientes().forEach(System.out::println);
+                    case 4 -> {
+                        var lista = svc.listarClientes();
+                        System.out.println("----- LISTA DE CLIENTES (" + lista.size() + ") -----");
+                        if (lista.isEmpty()) System.out.println("(No hay clientes.)");
+                        else lista.forEach(System.out::println);
+                    }
                     case 5 -> {
                         System.out.print("ID cliente: "); int cli = leerInt();
                         System.out.print("ID empleado: "); int emp = leerInt();
@@ -45,31 +55,53 @@ public class Main {
                         System.out.print("Interés %: "); double i = leerDouble();
                         System.out.print("Cuotas: "); int cu = leerInt();
                         var p = svc.crearPrestamo(cli, emp, m, i, cu);
-                        System.out.println("Creado: " + p);
+                        System.out.println("----- PRESTAMO CREADO -----");
+                        System.out.println(p);
                     }
                     case 6 -> {
-                        svc.listarPrestamos().forEach(System.out::println);
-                        System.out.print("¿Ver préstamos de un cliente? (id o 0=no): ");
+                        var todos = svc.listarPrestamos();
+                        System.out.println("----- LISTA DE PRESTAMOS (" + todos.size() + ") -----");
+                        if (todos.isEmpty()) System.out.println("(No hay prestamos.)");
+                        else todos.forEach(System.out::println);
+                        System.out.print("Ver prestamos de un cliente? (id numerico o 0=no): ");
                         int id = leerInt();
-                        if (id != 0) svc.prestamosPorCliente(id).forEach(System.out::println);
+                        if (id != 0) {
+                            var filtrados = svc.prestamosPorCliente(id);
+                            if (filtrados.isEmpty())
+                                System.out.println("No se encontraron prestamos para cliente id=" + id + ". Ojo: use el ID (1,2,3), no el documento (ej. 1003).");
+                            else filtrados.forEach(System.out::println);
+                        }
                     }
                     case 7 -> {
-                        System.out.print("ID préstamo: "); int id = leerInt();
+                        System.out.print("ID prestamo: "); int id = leerInt();
                         System.out.print("Monto abono: "); double m = leerDouble();
                         svc.registrarPago(id, m);
-                        System.out.println("Saldo pendiente: " + svc.saldoPendiente(id));
+                        System.out.println("----- PAGO REGISTRADO -----");
+                        System.out.println("Prestamo ID: " + id);
+                        System.out.println("Abono: " + String.format("%.2f", m));
+                        System.out.println("Saldo pendiente: " + String.format("%.2f", svc.saldoPendiente(id)));
                     }
                     case 8 -> {
-                        System.out.print("ID préstamo: "); int id = leerInt();
-                        svc.historicoPagos(id).forEach(System.out::println);
-                        System.out.println("Total pagado: " + svc.totalPagado(id));
-                        System.out.println("Saldo: " + svc.saldoPendiente(id));
+                        System.out.print("ID prestamo: "); int id = leerInt();
+                        var hist = svc.historicoPagos(id);
+                        System.out.println("----- HISTORICO DE PAGOS (Prestamo ID: " + id + ") -----");
+                        if (hist.isEmpty()) System.out.println("(Sin pagos registrados.)");
+                        else hist.forEach(System.out::println);
+                        System.out.println("Total pagado: " + String.format("%.2f", svc.totalPagado(id)));
+                        System.out.println("Saldo pendiente: " + String.format("%.2f", svc.saldoPendiente(id)));
                     }
                     case 9 -> {
-                        System.out.println("-- Activos --"); svc.prestamosActivos().forEach(System.out::println);
-                        System.out.println("-- Vencidos --"); svc.prestamosVencidos().forEach(System.out::println);
-                        System.out.println("-- Morosos --"); svc.clientesMorosos().forEach(System.out::println);
-                        System.out.println("Total cartera activa: " + svc.totalCarteraActiva());
+                        System.out.println("===== REPORTES =====");
+                        var act = svc.prestamosActivos();
+                        System.out.println("----- Prestamos activos (" + act.size() + ") -----");
+                        if (act.isEmpty()) System.out.println("(Ninguno.)"); else act.forEach(System.out::println);
+                        var ven = svc.prestamosVencidos();
+                        System.out.println("----- Prestamos vencidos (" + ven.size() + ") -----");
+                        if (ven.isEmpty()) System.out.println("(Ninguno.)"); else ven.forEach(System.out::println);
+                        var mor = svc.clientesMorosos();
+                        System.out.println("----- Clientes morosos (" + mor.size() + ") -----");
+                        if (mor.isEmpty()) System.out.println("(Ninguno.)"); else mor.forEach(System.out::println);
+                        System.out.println("Total cartera activa: " + String.format("%.2f", svc.totalCarteraActiva()));
                     }
                 }
             } catch (Exception e) {

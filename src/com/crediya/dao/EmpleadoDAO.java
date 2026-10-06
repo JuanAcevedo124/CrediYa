@@ -16,27 +16,38 @@ public class EmpleadoDAO implements IGenericDAO<Empleado> {
     @Override
 
     public void guardar(Empleado e) {
-        // 1. Archivo (siempre)
-        List<Empleado> todos = listarDeArchivo();
-        int nuevoId = todos.stream().mapToInt(Empleado::getId).max().orElse(0) + 1;
-        if (e.getId() == 0) e.setId(nuevoId);
+        // 1. Archivo (siempre) con ID sincronizado archivo/BD
+        if (e.getId() == 0) e.setId(siguienteId());
         FileManager.agregarLinea(FILE, e.toFileString());
 
         // 2. MySQL (si hay conexión)
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
             if (c == null) return;
-            String sql = "INSERT INTO empleados(nombre, documento, rol, correo, salario) VALUES(?,?,?,?,?)";
+            String sql = "INSERT INTO empleados(id, nombre, documento, rol, correo, salario) VALUES(?,?,?,?,?,?)";
             try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setString(1, e.getNombre());
-                ps.setString(2, e.getDocumento());
-                ps.setString(3, e.getRol());
-                ps.setString(4, e.getCorreo());
-                ps.setDouble(5, e.getSalario());
+                ps.setInt(1, e.getId());
+                ps.setString(2, e.getNombre());
+                ps.setString(3, e.getDocumento());
+                ps.setString(4, e.getRol());
+                ps.setString(5, e.getCorreo());
+                ps.setDouble(6, e.getSalario());
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
             System.out.println("[MySQL] No se pudo guardar empleado: " + ex.getMessage());
         }
+    }
+
+    private int siguienteId() {
+        int maxFile = listarDeArchivo().stream().mapToInt(Empleado::getId).max().orElse(0);
+        int maxDb = 0;
+        try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
+            if (c != null) try (Statement st = c.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT MAX(id) FROM empleados")) {
+                if (rs.next()) maxDb = rs.getInt(1);
+            }
+        } catch (Exception ignored) {}
+        return Math.max(maxFile, maxDb) + 1;
     }
 
     public List<Empleado> listarDeArchivo() {

@@ -38,7 +38,10 @@ public class Pago {
 
     @Override
     public String toString() {
-        return "Pago{id=" + id + ", prestamoId=" + prestamoId
-                + ", fecha=" + fechaPago + ", monto=" + monto + "}";
+        return "  Pago ID: " + id + "\n"
+             + "  Prestamo ID: " + prestamoId + "\n"
+             + "  Fecha pago: " + fechaPago + "\n"
+             + "  Monto: " + String.format("%.2f", monto) + "\n"
+             + "  ------------------------------";
     }
 }

@@ -12,24 +12,35 @@ public class ClienteDAO implements IGenericDAO<Cliente> {
     @Override
 
     public void guardar(Cliente c) {
-        List<Cliente> todos = listarDeArchivo();
-        int nuevoId = todos.stream().mapToInt(Cliente::getId).max().orElse(0) + 1;
-        if (c.getId() == 0) c.setId(nuevoId);
+        if (c.getId() == 0) c.setId(siguienteId());
         FileManager.agregarLinea(FILE, c.toFileString());
 
         try (Connection con = DatabaseConnection.getInstancia().getConnection()) {
             if (con == null) return;
-            String sql = "INSERT INTO clientes(nombre, documento, correo, telefono) VALUES(?,?,?,?)";
+            String sql = "INSERT INTO clientes(id, nombre, documento, correo, telefono) VALUES(?,?,?,?,?)";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setString(1, c.getNombre());
-                ps.setString(2, c.getDocumento());
-                ps.setString(3, c.getCorreo());
-                ps.setString(4, c.getTelefono());
+                ps.setInt(1, c.getId());
+                ps.setString(2, c.getNombre());
+                ps.setString(3, c.getDocumento());
+                ps.setString(4, c.getCorreo());
+                ps.setString(5, c.getTelefono());
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
             System.out.println("[MySQL] No se pudo guardar cliente: " + ex.getMessage());
         }
+    }
+
+    private int siguienteId() {
+        int maxFile = listarDeArchivo().stream().mapToInt(Cliente::getId).max().orElse(0);
+        int maxDb = 0;
+        try (Connection con = DatabaseConnection.getInstancia().getConnection()) {
+            if (con != null) try (Statement st = con.createStatement();
+                 ResultSet rs = st.executeQuery("SELECT MAX(id) FROM clientes")) {
+                if (rs.next()) maxDb = rs.getInt(1);
+            }
+        } catch (Exception ignored) {}
+        return Math.max(maxFile, maxDb) + 1;
     }
 
     public List<Cliente> listarDeArchivo() {
