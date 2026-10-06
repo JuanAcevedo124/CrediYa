@@ -6,8 +6,10 @@ import com.crediya.util.FileManager;
 import java.sql.*;
 import java.util.*;
 
-public class PrestamoDAO {
+public class PrestamoDAO implements IGenericDAO<Prestamo> {
     private static final String FILE = "data/prestamos.txt";
+
+    @Override
 
     public void guardar(Prestamo p) {
         List<Prestamo> todos = listarDeArchivo();
@@ -41,6 +43,7 @@ public class PrestamoDAO {
         return lista;
     }
 
+    @Override
     public List<Prestamo> listar() {
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
             if (c != null) {
@@ -85,3 +88,4 @@ public class PrestamoDAO {
         }
     }
 }
+

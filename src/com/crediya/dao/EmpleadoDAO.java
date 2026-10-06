@@ -10,8 +10,10 @@ import java.util.*;
  * Patrón DAO: separa acceso a datos de la lógica.
  * Guarda en ARCHIVO y en MySQL (si hay conexión).
  */
-public class EmpleadoDAO {
+public class EmpleadoDAO implements IGenericDAO<Empleado> {
     private static final String FILE = "data/empleados.txt";
+
+    @Override
 
     public void guardar(Empleado e) {
         // 1. Archivo (siempre)
@@ -45,6 +47,7 @@ public class EmpleadoDAO {
         return lista;
     }
 
+    @Override
     public List<Empleado> listar() {
         // Intenta MySQL primero, si falla usa archivo
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
@@ -66,3 +69,4 @@ public class EmpleadoDAO {
         return listarDeArchivo();
     }
 }
+

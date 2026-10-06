@@ -6,8 +6,10 @@ import com.crediya.util.FileManager;
 import java.sql.*;
 import java.util.*;
 
-public class PagoDAO {
+public class PagoDAO implements IGenericDAO<Pago> {
     private static final String FILE = "data/pagos.txt";
+
+    @Override
 
     public void guardar(Pago p) {
         List<Pago> todos = listarDeArchivo();
@@ -37,6 +39,7 @@ public class PagoDAO {
         return lista;
     }
 
+    @Override
     public List<Pago> listar() {
         try (Connection c = DatabaseConnection.getInstancia().getConnection()) {
             if (c != null) {
@@ -64,3 +67,4 @@ public class PagoDAO {
                 .toList();
     }
 }
+
