@@ -18,9 +18,9 @@ Persistencia dual: archivos `.txt` (siempre) + MySQL con JDBC (si hay conexión)
 - Conector ya incluido en `lib/mysql-connector-j.jar`
 
 ## Configurar clave MySQL
-Editar `src/com/crediya/util/DatabaseConnection.java`:
-```java
-private static final String PASSWORD = "TU_CLAVE";
+Copiar `db.properties.example` como `db.properties` (este archivo está en `.gitignore`) y poner la clave real:
+```properties
+db.password=TU_CLAVE
 ```
 
 ## Crear BD (PowerShell, NO usa < )
