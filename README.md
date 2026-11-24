@@ -1,63 +1,78 @@
-# CrediYa S.A.S. - Sistema de Préstamos y Cobros
+# CrediYa S.A.S.: sistema de préstamos y cobros
 
-## Descripción
-Sistema de consola en Java para gestionar empleados, clientes, préstamos y pagos.
-Persistencia dual: archivos `.txt` (siempre) + MySQL con JDBC (si hay conexión).
+Aplicación de consola en Java para gestionar empleados, clientes, préstamos y pagos. Guarda los datos en archivos de texto y, si hay conexión, también en MySQL mediante JDBC.
 
-## POO aplicada
-- **Herencia:** `Empleado` y `Cliente` heredan de `Persona` (abstracta).
-- **Polimorfismo:** `toFileString()` y `toString()` redefinidos; `Prestamo::isVencido` como referencia de método.
-- **Encapsulamiento:** atributos privados + getters/setters; cálculo de `total` y `cuota` dentro de `Prestamo`.
-- **SOLID:** DAO separados por entidad, `FileManager` solo archivos, `DatabaseConnection` Singleton solo conexión, `CrediYaService` solo negocio.
-- **Patrones:** DAO + Singleton.
-- **Streams/Lambdas:** en reportes (`filter`, `mapToDouble`, `collect`).
+## Funcionalidades
 
-## Requisitos
-- Java 17+ (`java -version`)
-- MySQL 8.0 corriendo + BD creada con `sql/schema.sql`
-- Conector ya incluido en `lib/mysql-connector-j.jar`
+- Registro y listado de empleados y clientes.
+- Creación de préstamos con cálculo automático de intereses y cuotas.
+- Registro de abonos e historial de pagos con saldo.
+- Reportes de préstamos activos, vencidos, clientes morosos y total de cartera.
+- Funcionamiento con archivos cuando MySQL no está disponible.
 
-## Configurar clave MySQL
-Copiar `db.properties.example` como `db.properties` (este archivo está en `.gitignore`) y poner la clave real:
-```properties
-db.password=TU_CLAVE
-```
+## Tecnologías
 
-## Crear BD (PowerShell, NO usa < )
-```powershell
-Get-Content "sql/schema.sql" | mysql -u root -p
-mysql -u root -p -e "USE crediya_db; SHOW TABLES;"
-```
+Java 17, MySQL 8, JDBC, Streams y expresiones lambda.
 
-## Compilar y ejecutar
-Doble clic o en terminal:
-```
-.\compilar.bat
-.\run.bat
-```
-O manual:
-```powershell
-javac -cp "lib/mysql-connector-j.jar" -d out (Get-ChildItem -Recurse -Filter "*.java" -Path "src" | ForEach-Object FullName)
-java -cp "out;lib/mysql-connector-j.jar" com.crediya.app.Main
-```
+## Diseño
 
-## Ejemplo de uso
-1. Registrar empleado (rol asesor) -> id 1
-2. Registrar cliente -> id 1
-3. Crear préstamo: cliente 1, empleado 1, monto 1000000, interés 10, cuotas 12
-   -> total = 1100000, cuota = 91666.66
-4. Registrar pago de 200000 -> saldo = 900000
-5. Reportes: activos, vencidos, morosos, total cartera.
+| Concepto | Aplicación |
+|---|---|
+| Herencia | `Empleado` y `Cliente` extienden la clase abstracta `Persona` |
+| Polimorfismo | Redefinición de `toFileString()` y `toString()` |
+| Encapsulamiento | El total y la cuota se calculan dentro de `Prestamo` |
+| Responsabilidad única | DAO por entidad; `FileManager` para archivos; `CrediYaService` para el negocio |
+| Patrones | DAO y Singleton (`DatabaseConnection`) |
 
 ## Estructura
-```
-src/com/crediya/model/ Persona, Empleado, Cliente, Prestamo, Pago
-src/com/crediya/util/ DatabaseConnection, FileManager
-src/com/crediya/dao/ EmpleadoDAO, ClienteDAO, PrestamoDAO, PagoDAO
-src/com/crediya/service/ CrediYaService
-src/com/crediya/app/ Main
-sql/schema.sql  lib/mysql-connector-j.jar  data/*.txt  docs/UML.puml
+
+```text
+CrediYa/
+├── src/com/crediya/
+│   ├── app/         Punto de entrada
+│   ├── dao/         Acceso a datos
+│   ├── exception/   Excepciones propias
+│   ├── model/       Entidades
+│   ├── service/     Reglas de negocio
+│   └── util/        Configuración, conexión, archivos y validación
+├── sql/schema.sql
+├── data/            Persistencia en archivos
+├── docs/            Diagrama UML
+└── lib/             Conector de MySQL
 ```
 
-## UML
-Ver `docs/UML.puml` (abrir en https://plantuml.com o extensión PlantUML en VSCode).
+## Instalación
+
+Requisitos: Java 17 o superior y MySQL 8 (opcional). Comandos para PowerShell.
+
+1. Copia la configuración y escribe tu contraseña en `db.properties`, que está excluido de Git:
+
+   ```powershell
+   Copy-Item db.properties.example db.properties
+   ```
+
+2. Crea la base de datos:
+
+   ```powershell
+   Get-Content sql/schema.sql | mysql -u root -p
+   ```
+
+3. Compila y ejecuta:
+
+   ```powershell
+   .\compilar.bat
+   .\run.bat
+   ```
+
+## Ejemplo
+
+Un préstamo de 1.000.000 con interés del 10 % a 12 cuotas genera un total de 1.100.000 y una cuota de 91.666,67. Después de un abono de 200.000, el saldo es de 900.000.
+
+## Documentación
+
+El diagrama de clases está en [docs/UML.md](docs/UML.md) y [docs/UML.puml](docs/UML.puml).
+
+## Autor
+
+Juan José Acevedo Morales, desarrollador de software junior.
+[Portafolio](https://juanacevedo124.github.io/Portafolio/) | [GitHub](https://github.com/JuanAcevedo124) | [LinkedIn](https://www.linkedin.com/in/juan-acevedo-b24759450/)
